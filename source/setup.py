@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from distribute_setup import use_setuptools
-use_setuptools(version="0.6.17")
+use_setuptools(version="0.6.49")
 
 from setuptools import setup, find_packages
 import os
@@ -18,11 +18,11 @@ setup(
     name="pydicom",
     packages=find_packages(),
     include_package_data=True,
-    version="1.0.0a",
+    version="0.9.9",
     package_data={'dicom': ['testfiles/*.dcm']},
     zip_safe=False,  # want users to be able to see included examples,tests
     description="Pure python package for DICOM medical file reading and writing",
-    author="Darcy Mason",
+    author="Darcy Mason and contributors",
     author_email="darcymason@gmail.com",
     url="http://pydicom.googlecode.com",
     license="MIT license",
@@ -40,6 +40,7 @@ setup(
         "Programming Language :: Python :: 3.1",
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Medical Science Apps.",
         "Topic :: Scientific/Engineering :: Physics",

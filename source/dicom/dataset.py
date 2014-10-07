@@ -52,8 +52,8 @@ except:
 
 
 class PropertyError(Exception):
-#  http://docs.python.org/release/3.1.3/tutorial/errors.html#tut-userexceptions
     """For AttributeErrors caught in a property, so do not go to __getattr__"""
+    #  http://docs.python.org/release/3.1.3/tutorial/errors.html#tut-userexceptions
     pass
 
 
@@ -162,7 +162,7 @@ class Dataset(dict):
         # Not found, raise an error in same style as python does
         else:
             raise AttributeError(name)
-    
+
     def __delitem__(self, key):
         """Intercept requests to delete an attribute by key, e.g. del ds[tag]"""
         # Assume is a standard tag (for speed in common case)
@@ -292,6 +292,20 @@ class Dataset(dict):
             self[tag] = DataElement_from_raw(data_elem, character_set)
         return dict.__getitem__(self, tag)
 
+    def get_item(self, key):
+        """Return the raw data element if possible.
+        It will be raw if the user has never accessed the value,
+        or set their own value.
+        Note if the data element is a deferred-read element,
+        then it is read and converted before being returned
+        """
+        tag = Tag(key)
+        data_elem = dict.__getitem__(self, tag)
+        # If a deferred read, return using __getitem__ to read and convert it
+        if isinstance(data_elem, tuple) and data_elem.value is None:
+            return self[key]
+        return data_elem
+
     def group_dataset(self, group):
         """Return a Dataset containing only data_elements of a certain group.
 
@@ -330,7 +344,7 @@ class Dataset(dict):
         :raises ImportError: if cannot import numpy.
 
         """
-        if not 'PixelData' in self:
+        if 'PixelData' not in self:
             raise TypeError("No pixel data found in this dataset.")
 
         if not have_numpy:
@@ -349,9 +363,10 @@ class Dataset(dict):
         try:
             numpy_format = numpy.dtype(format_str)
         except TypeError:
-            raise TypeError("Data type not understood by NumPy: "
-                            "format='%s', PixelRepresentation=%d, BitsAllocated=%d" % (
-                            numpy_format, self.PixelRepresentation, self.BitsAllocated))
+            msg = ("Data type not understood by NumPy: "
+                   "format='%s', PixelRepresentation=%d, BitsAllocated=%d")
+            raise TypeError(msg % (numpy_format, self.PixelRepresentation,
+                            self.BitsAllocated))
 
         # Have correct Numpy format, so create the NumPy array
         arr = numpy.fromstring(self.PixelData, numpy_format)

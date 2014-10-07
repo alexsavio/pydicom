@@ -10,6 +10,7 @@ from dicom.dataset import Dataset, PropertyError
 from dicom.dataelem import DataElement, RawDataElement
 from dicom.tag import Tag
 from dicom.sequence import Sequence
+from dicom import in_py3
 
 
 class DatasetTests(unittest.TestCase):
@@ -32,8 +33,14 @@ class DatasetTests(unittest.TestCase):
         """Check the expected args were returned from an exception
         start_args -- a string with the start of the expected message
         """
-        # based on same link as failUnlessRaises override above
-        excObj = self.failUnlessRaises(excClass, callableObj)
+        if in_py3:
+            with self.assertRaises(excClass) as cm:
+                callableObj()
+
+            excObj = cm.exception
+        else:
+            excObj = self.failUnlessRaises(excClass, callableObj)
+
         msg = "\nExpected Exception message:\n" + start_args
         msg += "\nGot:\n" + excObj.args[0]
         self.assertTrue(excObj.args[0].startswith(start_args), msg)
@@ -89,7 +96,7 @@ class DatasetTests(unittest.TestCase):
         """Dataset: can test if item present by 'if <name> in dataset'......"""
         ds = self.dummy_dataset()
         self.assertTrue('TreatmentMachineName' in ds, "membership test failed")
-        self.assertTrue(not 'Dummyname' in ds, "non-member tested as member")
+        self.assertTrue('Dummyname' not in ds, "non-member tested as member")
 
     def testContains(self):
         """Dataset: can test if item present by 'if <tag> in dataset'......."""
@@ -257,9 +264,11 @@ class DatasetTests(unittest.TestCase):
     def testDeleteNonExistingItem(self):
         """Dataset: raise KeyError for non-existing item delete........"""
         ds = self.dummy_dataset()
+
         def try_delete():
             del ds[0x10, 0x10]
         self.assertRaises(KeyError, try_delete)
+
 
 class DatasetElementsTests(unittest.TestCase):
     """Test valid assignments of data elements"""
