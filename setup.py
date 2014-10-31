@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from distribute_setup import use_setuptools
-use_setuptools(version="0.6.49")
 
 from setuptools import setup, find_packages
 import os
@@ -27,6 +26,7 @@ setup(
     url="http://pydicom.googlecode.com",
     license="MIT license",
     keywords="dicom python medical imaging",
+    platforms='Linux/MacOSX',
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Intended Audience :: Developers",
