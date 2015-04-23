@@ -13,11 +13,12 @@ logger = logging.getLogger('pydicom')
 from dicom import in_py3
 from dicom.charset import default_encoding, text_VRs, convert_encodings
 from dicom.UID import ExplicitVRLittleEndian, ImplicitVRLittleEndian, ExplicitVRBigEndian
-from dicom.filebase import DicomFile
+from dicom.filebase import DicomFile, DicomFileLike
 from dicom.dataset import Dataset
 from dicom.dataelem import DataElement
 from dicom.tag import Tag, ItemTag, ItemDelimiterTag, SequenceDelimiterTag
 from dicom.valuerep import extra_length_VRs
+from dicom.tagtools import tag_in_exception
 
 
 def write_numbers(fp, data_element, struct_format):
@@ -194,8 +195,9 @@ def write_dataset(fp, dataset, parent_encoding=default_encoding):
     tags = sorted(dataset.keys())
 
     for tag in tags:
-        # write_data_element(fp, dataset.get_item(tag), dataset_encoding)  XXX for writing raw tags without converting to DataElement
-        write_data_element(fp, dataset[tag], dataset_encoding)
+        with tag_in_exception(tag):
+            # write_data_element(fp, dataset.get_item(tag), dataset_encoding)  XXX for writing raw tags without converting to DataElement
+            write_data_element(fp, dataset[tag], dataset_encoding)
 
     return fp.tell() - fpStart
 
@@ -333,7 +335,15 @@ def write_file(filename, dataset, write_like_original=True):
         else:
             raise NotImplementedError("pydicom has not been verified for Big Endian with Implicit VR")
 
-    fp = DicomFile(filename, 'wb')
+    caller_owns_file = True
+    # Open file if not already a file object
+    if isinstance(filename, basestring):
+        fp = DicomFile(filename, 'wb')
+        # caller provided a file name; we own the file handle
+        caller_owns_file = False
+    else:
+        fp = DicomFileLike(filename)
+
     try:
         if preamble:
             fp.write(preamble)  # blank 128 byte preamble
@@ -345,7 +355,8 @@ def write_file(filename, dataset, write_like_original=True):
 
         write_dataset(fp, dataset)
     finally:
-        fp.close()
+        if not caller_owns_file:
+            fp.close()
 
 # Map each VR to a function which can write it
 # for write_numbers, the Writer maps to a tuple (function, struct_format)

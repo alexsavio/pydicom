@@ -1,36 +1,38 @@
-*.py[cod]
+# .gitignore file
+ 
+# Backup files
+*~
 
-# C extensions
-*.so
+# Lock files used by the Emacs editor.
+.\#*
 
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-__pycache__
+# Temporary files used by editors.
+*.swp
+*.orig
+*.bak
 
-# Installer logs
-pip-log.txt
+# A hidden file created by the Mac OS X Finder.
+.DS_Store
 
-# Unit test / coverage reports
-.coverage
-.tox
-nosetests.xml
+# python byte-code files
+*.pyc
+*.pyo
 
-# Translations
-*.mo
+# Build/dist files
+source/dist/*
+source/build/*
+source/pydicom.egg-info/*
+source/distribute*.egg
+source/distribute*.tar.gz
+py3source
+source/.tox/*
 
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
+# Docs build
+docs/_build/*
+
+# coverage.py files
+source/dicom/test/.coverage
+source/dicom/test/htmlcov
+
+# PyCharm IDE files
+*.idea*
